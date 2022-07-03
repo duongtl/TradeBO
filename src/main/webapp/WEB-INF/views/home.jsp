@@ -88,13 +88,13 @@
             border-radius: 10px;
         }
 
-        #dataRender code{
+        #dataRender code {
             /*-webkit-user-modify: read-write-plaintext-only;*/
             font-size: 100%;
             color: #000000;
         }
 
-        pre{
+        pre {
             word-break: normal;
             font-size: 100%;
         }
@@ -279,7 +279,7 @@
                                                 <small class="text-muted float-end">Medium</small>
                                             </div>
                                             <div class="card-body">
-                                                <form>
+                                                <form autocomplete="off">
                                                     <div class="row mb-3">
                                                         <label class="col-sm-2 col-form-label"
                                                                for="basic-icon-default-21">Hệ số</label>
@@ -302,29 +302,33 @@
                                                             </div>
                                                         </div>
                                                     </div>
+
                                                     <div class="row mb-3">
                                                         <label class="col-sm-2 col-form-label"
-                                                               for="basic-icon-default-22">Bot
-                                                            ID</label>
+                                                               for="bot-id">Phương pháp</label>
                                                         <div class="col-sm-10">
                                                             <div class="input-group input-group-merge">
-                                                  <span id="basic-icon-default-22" class="input-group-text"><i
+                                                  <span id="basic-icon-default-23" class="input-group-text"><i
                                                           class="bx bx-user"></i>
                                                   </span>
-                                                                <input id="bot-id"
+                                                                <input style="border-right: inset;border-radius: 0.375rem;"
+                                                                       class="form-control" list="datalistOptions"
+                                                                       id="bot-id"
                                                                        onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                                                                        required="required"
-                                                                       oninvalid="this.setCustomValidity('Vui lòng nhập Bot ID')"
+                                                                       oninvalid="this.setCustomValidity('Vui lòng chọn phương pháp')"
                                                                        oninput="this.setCustomValidity('')"
-                                                                       type="number"
-                                                                       class="form-control"
-                                                                       placeholder="Bot ID"
-                                                                       aria-label="Bot ID"
-                                                                       aria-describedby="basic-icon-default-22"
-                                                                />
+                                                                       placeholder="Chọn phương pháp...">
+                                                                <datalist id="datalistOptions">
+                                                                    <%--@elvariable id="methods" type="java.util.List"--%>
+                                                                    <c:forEach items="${methods}" var="item">
+                                                                        <option value="${item.id}">${item.name}</option>
+                                                                    </c:forEach>
+                                                                </datalist>
                                                             </div>
                                                         </div>
                                                     </div>
+
 
                                                     <div class="row justify-content-end">
                                                         <div class="col-sm-10">
@@ -341,7 +345,7 @@
                                                     <button id="btnShowModal"
                                                             data-bs-toggle="modal"
                                                             data-bs-target="#modalScrollable"
-                                                            style="display: block">
+                                                            style="display: none">
                                                     </button>
                                                 </form>
                                             </div>
@@ -511,7 +515,7 @@
         console.log("start " + new Date());
     };
 
-    $('#clearLog').click(function (){
+    $('#clearLog').click(function () {
         $('#dataRender').html('');
     })
 
@@ -519,7 +523,7 @@
         let data = e.data;
         // data = data.replaceAll("\r", "</pre></code>");
         // data = data.replaceAll("\n", "<code><pre>");
-        data = "<code><pre>" + data +"</pre><code>"
+        data = "<code><pre>" + data + "</pre><code>"
 
         let style = $('#modalScrollable').attr("style") + "";
         if (style.indexOf('none') !== -1) {
