@@ -9268,9 +9268,9 @@ button.list-group-item-gray.active {
     }
 }
 
-.accordion-header + .accordion-collapse .accordion-body {
-    padding-top: 0;
-}
+/*.accordion-header + .accordion-collapse .accordion-body {*/
+/*    padding-top: 0;*/
+/*}*/
 
 .accordion.accordion-without-arrow .accordion-button::after {
     background-image: none !important;

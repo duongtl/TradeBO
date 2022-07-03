@@ -5,6 +5,7 @@ import com.bo.trade.dto.Method;
 import com.bo.trade.entity.ResultEntity;
 import com.bo.trade.repository.ResultRepository;
 import com.bo.trade.service.ResultService;
+import com.bo.trade.websocket.SessionManager;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -157,7 +158,7 @@ public class ResultServiceImpl implements ResultService {
                         if (log) {
                             String winMoney = df.format(aa.get(i) * 1.95);
                             if (changed < 0) {
-                                change = "➤ - " + df.format(Math.abs(changed)) + " $";
+                                change = "➤ - " + df.format(-changed) + " $";
                             } else {
                                 change = "➤ + " + df.format(changed) + " $";
                             }
@@ -180,7 +181,7 @@ public class ResultServiceImpl implements ResultService {
                     if (log) {
                         String winMoney = df.format(bb.get(i) * 1.95);
                         if (changed < 0) {
-                            change = "➤ - " + df.format(Math.abs(changed)) + " $";
+                            change = "➤ - " + df.format(-changed) + " $";
                         } else {
                             change = "➤ + " + df.format(changed) + " $";
                         }
@@ -263,7 +264,7 @@ public class ResultServiceImpl implements ResultService {
 
         stringBuilder.append(String.format("%-5s %d (%2d liên thông)%n", "WIN:", totalWin, maxWLT));
         stringBuilder.append(String.format("%-5s %d (%2d liên thông)%n", "LOSS:", totalLoss, maxLLT));
-        stringBuilder.append(String.format("%-5s %.2f %s%n", "TL:", 100D * maxWLT / (maxLLT + maxWLT), "%"));
+        stringBuilder.append(String.format("%-5s %.2f %s%n", "TLWin:", 100D * totalWin / (totalWin + totalLoss), "%"));
 
         if (log) {
             List<Integer> kc = new ArrayList<>();
@@ -278,6 +279,7 @@ public class ResultServiceImpl implements ResultService {
         }
         stringBuilder.append(String.format("%s\n", line("─", 72)));
         System.out.println(stringBuilder);
+        SessionManager.sendAll(stringBuilder.toString());
         return stringBuilder.toString();
     }
 
