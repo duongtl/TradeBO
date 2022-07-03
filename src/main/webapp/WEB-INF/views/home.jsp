@@ -21,7 +21,7 @@
             content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
 
-    <title>Horizontal Layouts - Forms | Sneat - Bootstrap 5 HTML Admin Template - Pro</title>
+    <title>Support Trade - Pro</title>
 
     <meta name="description" content=""/>
 
@@ -394,7 +394,16 @@
     </div>
 
     <div class="buy-now">
-        <button id="clearLog" class="btn btn-danger btn-buy-now">Clear</button>
+        <div class="btn-group" style="position: fixed; bottom: 3rem;right: 1.625rem;z-index: 999999;">
+            <button type="button" class="btn btn-primary btn-icon rounded-pill dropdown-toggle hide-arrow"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bx bx-dots-vertical-rounded"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" style="">
+                <li><a class="dropdown-item" id="clearLog" href="javascript:void(0);">Clear</a></li>
+                <li><a class="dropdown-item" id="downloadFile" href="javascript:void(0);">Save</a></li>
+            </ul>
+        </div>
     </div>
     <!-- Overlay -->
     <div class="layout-overlay layout-menu-toggle"></div>
@@ -414,6 +423,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
         crossorigin="anonymous"></script>
 <script>
+    let logs = '';
 
     $('#scanOnly').click(function () {
         disableBtn();
@@ -480,6 +490,13 @@
         document.body.removeChild(element);
     }
 
+    $('#downloadFile').click(function () {
+        if (logs === '') {
+            return;
+        }
+        download(new Date().toLocaleString() + "_LOG_BO", logs)
+    })
+
     $('#scanOne').click(function () {
         const id = $('#bot-id').val();
         const heSo = $('#he-so').val();
@@ -504,9 +521,7 @@
             }
         });
     })
-</script>
 
-<script type="text/javascript">
     let socket = new WebSocket("ws://localhost:8080/ws");
     let timer = -1;
 
@@ -516,22 +531,20 @@
     };
 
     $('#clearLog').click(function () {
+        logs = '';
         $('#dataRender').html('');
     })
 
     socket.onmessage = function (e) {
         let data = e.data;
-        // data = data.replaceAll("\r", "</pre></code>");
-        // data = data.replaceAll("\n", "<code><pre>");
+        logs = logs + data
         data = "<code><pre>" + data + "</pre><code>"
-
         let style = $('#modalScrollable').attr("style") + "";
         if (style.indexOf('none') !== -1) {
             $('#btnShowModal').click();
         }
         $('#dataRender').append(data).scrollTop(Number.MAX_SAFE_INTEGER);
         $('#loadData').attr('style', 'display: block');
-        console.log(data);
     };
 
     socket.onclose = function (event) {
