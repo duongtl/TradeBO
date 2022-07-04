@@ -311,7 +311,7 @@
                                                   <span id="basic-icon-default-23" class="input-group-text"><i
                                                           class="bx bx-user"></i>
                                                   </span>
-                                                                <input style="border-right: inset;border-radius: 0.375rem;"
+                                                                <input style="border-radius: 0 0.375rem 0.375rem 0;"
                                                                        class="form-control" list="datalistOptions"
                                                                        id="bot-id"
                                                                        onkeypress="return event.charCode >= 48 && event.charCode <= 57"
@@ -351,12 +351,108 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <div class="col-xl-12">
+                                        <div class="card mb-2 mt-2">
+                                            <div class="card-header d-flex align-items-center justify-content-between">
+                                                <h5 class="mb-0">Advanced</h5>
+                                                <small class="text-muted float-end">Medium</small>
+                                            </div>
+                                            <div class="card-body">
+                                                <form autocomplete="off">
+                                                    <div class="row mb-3">
+                                                        <label class="col-sm-2 col-form-label"
+                                                               for="basic-icon-default-21">Cookie</label>
+                                                        <div class="col-sm-10">
+                                                            <div class="input-group input-group-merge">
+                                                  <span id="basic-icon-default-24" class="input-group-text"><i
+                                                          class="bx bx-user"></i>
+                                                  </span>
+                                                                <input id="cookie"
+                                                                       value="1"
+                                                                       required="required"
+                                                                       oninvalid="this.setCustomValidity('Vui lòng nhập cookie')"
+                                                                       oninput="this.setCustomValidity('')"
+                                                                       type="password"
+                                                                       class="form-control"
+                                                                       placeholder="Nhập cookie..."
+                                                                       aria-label="Nhập cookie..."
+                                                                       aria-describedby="basic-icon-default-fullname2"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row mb-3">
+                                                        <label class="col-sm-2 col-form-label"
+                                                               for="loai">Loại</label>
+                                                        <div class="col-sm-10">
+                                                            <div class="input-group input-group-merge">
+                                                  <span id="basic-icon-default-25" class="input-group-text"><i
+                                                          class="bx bx-user"></i>
+                                                  </span>
+                                                                <input style="border-radius: 0 0.375rem 0.375rem 0;"
+                                                                       class="form-control" list="datalistOptions2"
+                                                                       id="loai"
+                                                                       pattern="[0-9]{1}"
+                                                                       onkeypress="return event.charCode >= 48 && event.charCode <= 57 && $('#loai').val().length < 1"
+                                                                       required="required"
+                                                                       oninvalid="this.setCustomValidity('Vui lòng chọn loại')"
+                                                                       oninput="this.setCustomValidity('')"
+                                                                       placeholder="Chọn loại...">
+                                                                <datalist id="datalistOptions2">
+                                                                    <option value="0">BOT TRADE SIGNAL</option>
+                                                                    <option value="1">BOT TRADE TELEGRAM</option>
+                                                                    <option value="3">XTECH PREMIUM</option>
+                                                                </datalist>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+
+                                                    <div class="row mb-3">
+                                                        <label class="col-sm-2 col-form-label"
+                                                               for="bot-id-3">Bot</label>
+                                                        <div class="col-sm-10">
+                                                            <div class="input-group input-group-merge">
+                                                  <span id="basic-icon-default-26" class="input-group-text"><i
+                                                          class="bx bx-user"></i>
+                                                  </span>
+                                                                <input style="border-radius: 0 0.375rem 0.375rem 0;"
+                                                                       class="form-control" list="datalistOptions3"
+                                                                       id="bot-id-3"
+                                                                       onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                                                                       required="required"
+                                                                       oninvalid="this.setCustomValidity('Vui lòng chọn bot')"
+                                                                       oninput="this.setCustomValidity('')"
+                                                                       placeholder="Chọn bot...">
+                                                                <datalist id="datalistOptions3">
+                                                                </datalist>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+
+                                                    <div class="row justify-content-end">
+                                                        <div class="col-sm-10">
+                                                            <button type="submit" id="scanOne2" class="btn btn-primary">
+                                                                <div id="loadScanOne2" style="display: none"
+                                                                     class="spinner-border spinner-border-sm text-white"
+                                                                     role="status">
+                                                                    <span class="visually-hidden">Loading...</span>
+                                                                </div>
+                                                                <p class="mb-0">Scan</p>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="tab-pane fade" id="navs-pills-justified-profile" role="tabpanel">
                                     <div class="col-xl-12">
                                         <div class="card mb-2 mt-2">
-                                            <%--                                            <div class="card-header d-flex align-items-center justify-content-between">--%>
-                                            <%--                                            </div>--%>
                                             <div class="card-body">
                                                 <div id="dataRender" style="height: 70vh;overflow: auto">
                                                 </div>
@@ -424,6 +520,11 @@
         crossorigin="anonymous"></script>
 <script>
     let logs = '';
+
+    let c = localStorage.getItem('c');
+    if (c !== undefined) {
+        $('#cookie').val(c)
+    }
 
     $('#scanOnly').click(function () {
         disableBtn();
@@ -497,6 +598,35 @@
         download(new Date().toLocaleString() + "_LOG_BO", logs)
     })
 
+    $('#loai').on('input', function () {
+        let loai = $('#loai').val();
+        let cookie = $('#cookie').val();
+        if (loai !== '' && cookie !== '') {
+            $.ajax({
+                url: "/get?cookie=" + cookie + "&type=" + loai,
+                type: "get",
+                success: function (result) {
+                    console.log(result);
+                    $('#datalistOptions3').html('');
+                    Array.from(result).forEach(value => {
+                        let v = value.botID;
+                        let n = value.botName;
+                        $('#datalistOptions3').append('<option value="' + v + '">' + n + '</option>');
+                    })
+
+                },
+                error: function (jqXhr, textStatus, errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+    })
+
+    $('#cookie').on('keyup', function (e) {
+        console.log('vv')
+        localStorage.setItem('c', $('#cookie').val());
+    })
+
     $('#scanOne').click(function () {
         const id = $('#bot-id').val();
         const heSo = $('#he-so').val();
@@ -533,7 +663,6 @@
             socket.send("");
         }, 5000);
     };
-
 
 
     $('#clearLog').click(function () {

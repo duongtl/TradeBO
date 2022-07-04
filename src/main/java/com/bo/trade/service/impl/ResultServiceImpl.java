@@ -1,7 +1,6 @@
 package com.bo.trade.service.impl;
 
-import com.bo.trade.dto.BO;
-import com.bo.trade.dto.Method;
+import com.bo.trade.dto.*;
 import com.bo.trade.entity.ResultEntity;
 import com.bo.trade.repository.ResultRepository;
 import com.bo.trade.service.ResultService;
@@ -9,10 +8,7 @@ import com.bo.trade.websocket.SessionManager;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -32,32 +28,42 @@ import java.util.stream.IntStream;
 @RequiredArgsConstructor
 public class ResultServiceImpl implements ResultService {
 
-    private static final String URL = "https://superxbot.com/api/signal/logmix.php";
+    private static final String URL1 = "https://superxbot.com/api/signal/logmix.php";
+    private static final String URL2 = "https://superxbot.com/api/bot/getList.php?typeBot=";
+    private static final String URL3 = "https://superxbot.com/api/bot/getLog.php";
     private final ResultRepository resultRepository;
     List<Method> methods = Method.getPP();
     String a = "1-1-2-2-3-4-05-07-10-13-18-24-32-44-059-080-108-146-197-271";
     String b = "1-2-4-4-6-8-10-14-20-26-36-48-64-88-118-160-216-292-394-542";
+    Gson gson = new Gson();
+    ClientHttpRequestFactory factory = new BufferingClientHttpRequestFactory(new SimpleClientHttpRequestFactory());
+    RestTemplate restTemplate = new RestTemplate(factory);
+    static int maxPage = 1;
 
-    /*
-    public static StringBuilder replaceAll(StringBuilder sb, String find, String replace) {
-        return new StringBuilder(Pattern.compile(find).matcher(sb).replaceAll(replace));
-    }
-     */
 
-    @Override
-    public List<BO> getData(String pp, String sl) {
-        long start = System.currentTimeMillis();
+    public HttpHeaders buildHeader(String cookie) {
         HttpHeaders headers = new HttpHeaders();
-        Gson gson = new Gson();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.add("Cookie", cookie);
+        return headers;
+    }
+
+    public Map<String, Object> buildPayload(Integer page, Long botId) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("page", page);
+        map.put("BotID", botId);
+        return map;
+    }
+
+    @Override
+    public List<BO> getDataPP(String pp, String sl) {
+        long start = System.currentTimeMillis();
         Map<String, Object> map = new HashMap<>();
         map.put("listPP", pp);
         map.put("getCount", sl);
-        ClientHttpRequestFactory factory = new BufferingClientHttpRequestFactory(new SimpleClientHttpRequestFactory());
-        RestTemplate restTemplate = new RestTemplate(factory);
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(map, headers);
-        ResponseEntity<String> responseEntity = restTemplate.postForEntity(URL, map, String.class, entity);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(map, buildHeader(""));
+        ResponseEntity<String> responseEntity = restTemplate.postForEntity(URL1, map, String.class, entity);
         String res = responseEntity.getBody();
         if (res == null) {
             return new ArrayList<>();
@@ -71,15 +77,33 @@ public class ResultServiceImpl implements ResultService {
     }
 
     @Override
+    public List<BOT> getDataBot(String cookie, Integer typeBot) {
+        long start = System.currentTimeMillis();
+        HttpEntity<String> entity = new HttpEntity<>(buildHeader(cookie));
+        ResponseEntity<String> responseEntity = restTemplate.exchange(URL2 + typeBot, HttpMethod.GET, entity, String.class);
+        String res = responseEntity.getBody();
+        if (res == null) {
+            return new ArrayList<>();
+        }
+        if (res.equals("false")) {
+            return new ArrayList<>();
+        }
+        BOT[] arr = gson.fromJson(responseEntity.getBody(), BOT[].class);
+        System.out.println("Fetch time: " + (System.currentTimeMillis() - start) + "ms ");
+        return Arrays.stream(arr).collect(Collectors.toList());
+    }
+
+    @Override
     public void saveData() {
         for (Method method : methods) {
-            List<BO> data = getData(String.valueOf(method.getId()), "1000");
+            List<BO> data = getDataPP(String.valueOf(method.getId()), "1000");
             List<ResultEntity> entities = data.stream().map(bo -> toEntity(bo, method)).collect(Collectors.toList());
             ResultEntity lastResult = resultRepository.findFirstByMethodIdOrderByIdDesc(Long.valueOf(method.getId()));
             if (lastResult != null) {
                 entities = entities.stream().filter(resultEntity -> resultEntity.getOrderId() > lastResult.getOrderId()).collect(Collectors.toList());
             }
             log.info("Method {}, size {}", method.getName(), entities.size());
+            SessionManager.sendAll(String.format("Phương pháp %s cập nhật %d bản ghi mới", method.getName(), entities.size()));
             resultRepository.saveAll(entities);
         }
 
@@ -108,6 +132,33 @@ public class ResultServiceImpl implements ResultService {
     }
 
     @Override
+    public List<History> getHistory(String cookie, Long botId) {
+        int page = 1;
+        maxPage = 1;
+        long start = System.currentTimeMillis();
+        List<History> histories = new ArrayList<>();
+        do {
+            histories.addAll(mapperChildHistory(cookie, botId, page));
+            page++;
+        }
+        while (page <= maxPage);
+        System.out.println("Fetch time: " + (System.currentTimeMillis() - start) + "ms ");
+        return histories;
+    }
+
+    public List<History> mapperChildHistory(String cookie, Long botId, Integer page) {
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(buildPayload(page, botId), buildHeader(cookie));
+        ResponseEntity<String> responseEntity = restTemplate.exchange(URL3, HttpMethod.POST, entity, String.class);
+        if (responseEntity.getBody() == null) {
+            return new ArrayList<>();
+        }
+        ResponseLog responseLog = gson.fromJson(responseEntity.getBody(), ResponseLog.class);
+        maxPage = responseLog.getTotalPage();
+        History[] arr = gson.fromJson(responseLog.getD(), History[].class);
+        return Arrays.stream(arr).collect(Collectors.toList());
+    }
+
+    @Override
     public String runScan(Long id, Double heSo) {
         if (heSo == null) {
             heSo = 1D;
@@ -119,7 +170,7 @@ public class ResultServiceImpl implements ResultService {
 
     private String logData(Integer xx, Boolean log, List<Method> methods, List<Double> aa, List<Double> bb) {
         StringBuilder stringBuilder = new StringBuilder();
-        List<BO> data = getData(String.valueOf(xx), "1000");
+        List<BO> data = getDataPP(String.valueOf(xx), "1000");
         if (data.isEmpty() || xx >= methods.size()) {
             return "No data";
         }

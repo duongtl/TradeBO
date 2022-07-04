@@ -8398,7 +8398,7 @@ button:focus {
 
 .input-group-merge .form-control:not(:last-child) {
     padding-right: 0;
-    border-right: 0;
+    /*border-right: 0;*/
 }
 
 .input-group-text {

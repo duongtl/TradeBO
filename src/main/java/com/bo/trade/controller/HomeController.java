@@ -5,10 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("")
@@ -20,6 +17,16 @@ public class HomeController {
     private ResponseEntity<?> scanDataAndSave() {
         resultService.saveData();
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/get")
+    private ResponseEntity<?> setListBot(@RequestParam("cookie") String cookie, @RequestParam("type") Integer type) {
+        return new ResponseEntity<>(resultService.getDataBot(cookie, type), HttpStatus.OK);
+    }
+
+    @GetMapping("/get-history")
+    private ResponseEntity<?> getHistoryBot(@RequestParam("cookie") String cookie, @RequestParam("bot_id") Long botId) {
+        return new ResponseEntity<>(resultService.getHistory(cookie, botId), HttpStatus.OK);
     }
 
     @GetMapping("/scan")
