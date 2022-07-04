@@ -528,7 +528,13 @@
     socket.onopen = function (e) {
         console.log("[open] Connection established");
         console.log("start " + new Date());
+
+        timer = setInterval(() => {
+            socket.send("");
+        }, 5000);
     };
+
+
 
     $('#clearLog').click(function () {
         logs = '';
@@ -537,14 +543,16 @@
 
     socket.onmessage = function (e) {
         let data = e.data;
-        logs = logs + data
-        data = "<code><pre>" + data + "</pre><code>"
-        let style = $('#modalScrollable').attr("style") + "";
-        if (style.indexOf('none') !== -1) {
-            $('#btnShowModal').click();
+        if (data.indexOf('"status":200') === -1) {
+            logs = logs + data
+            data = "<code><pre>" + data + "</pre><code>"
+            let style = $('#modalScrollable').attr("style") + "";
+            if (style.indexOf('none') !== -1) {
+                $('#btnShowModal').click();
+            }
+            $('#dataRender').append(data).scrollTop(Number.MAX_SAFE_INTEGER);
+            $('#loadData').attr('style', 'display: block');
         }
-        $('#dataRender').append(data).scrollTop(Number.MAX_SAFE_INTEGER);
-        $('#loadData').attr('style', 'display: block');
     };
 
     socket.onclose = function (event) {
